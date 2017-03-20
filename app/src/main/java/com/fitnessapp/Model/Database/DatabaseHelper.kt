@@ -5,50 +5,36 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import com.fitnessapp.Model.*
 import java.util.*
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, this.DATABASE_NAME, null, this.DATABASE_VERSION) {
 
     companion object {
 
-        // Allgemein gueltige public Konstanten
-        private val ARR_CC = 30
-        private val DATE_CC = 20
-
         // Allgemein gueltige private Konstanten
         private val DATABASE_VERSION = 1
         private val DATABASE_NAME = "MyNoteDb"
 
-        // Anzahl der Chars, muss-Angabe fuer VarChar2, zu String konvertiert
-        private val ARR_CCSTR = ARR_CC.toString()
-        private val DATE_CCSTR = DATE_CC.toString()
-
-        // Tabellen- und deren Spaltennamen
-        private val TABLE = "note"
-        private val KEY_ID = "id"
-        private val KEY_ARR = "arr"
-        private val KEY_DATE = "date"
-
-        private fun createTableNOTE(db: SQLiteDatabase) {
-            // 1. Array<Set> sets | 2. java.util date
-            db.execSQL("CREATE TABLE " + TABLE + "(" +
-                    KEY_ID + " INTEGER PRIMARY KEY, " +
-                    KEY_ARR + " VARCHAR(" + ARR_CCSTR + "), " +
-                    KEY_DATE + " VARCHAR(" + DATE_CCSTR + ")" +
-                    ")")
+        private fun createAllTables(db: SQLiteDatabase) {
+            db.execSQL(getCREATEExerciseTable())
+            db.execSQL(getCREATETrainingSetTable())
+            db.execSQL(getCREATETrainingTable())
         }
 
-        private fun dropTableNOTE(db: SQLiteDatabase) {
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE)
+        private fun dropAllTables(db: SQLiteDatabase) {
+            db.execSQL(getDROPExerciseTable())
+            db.execSQL(getDROPTrainingSetTable())
+            db.execSQL(getDROPTrainingTable())
         }
     }
 
     override fun onCreate(db: SQLiteDatabase) {
-        createTableNOTE(db)
+        createAllTables(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        dropTableNOTE(db)
+        dropAllTables(db)
         onCreate(db)
     }
 
@@ -57,11 +43,23 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, this.DATABASE
     Schreiben, Lesen, Updaten und Loeschen von Eintraegen
     *//////////////////
 
+    fun insertExercise(exe: Exercise): Long? {}
+    fun getExercise(id: Int): Exercise {}
+    fun deleteExercise(id: Int): Boolean {}
+    fun updateExercise(id: Int): Boolean {}
+    fun getAllExercises(): ArrayList<Exercise> {}
 
+    fun insertSet(set: TrainingSet): Long? {}
+    fun getSet(id: Int): TrainingSet {}
+    fun deleteSet(id: Int): Boolean {}
+    fun updateSet(id: Int): Boolean {}
+    fun getAllSets(): ArrayList<TrainingSet> {}
 
-
-
-
+    fun insertTraining(train: Training): Long? {}
+    fun getTraining(id: Int): Training {}
+    fun deleteTraining(id: Int): Boolean {}
+    fun updateTraining(id: Int): Boolean {}
+    fun getAllTrainings(): ArrayList<Training> {}
 
 
 
@@ -72,10 +70,10 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, this.DATABASE
         val values = ContentValues()
 
         val dateStr = trainDay.date.time.toString()
-        values.put(KEY_ARR, trainDay.sets)
-        values.put(KEY_DATE, dateStr)
+        values.put(KEY_ARR, trainDay.trainingSets)
+        values.put(KEY_DESC, dateStr)
 
-        val id = db.insertOrThrow(TABLE, null, values)
+        val id = db.insertOrThrow(EXERCISE_TABLE, null, values)
 
         Log.println(Log.ASSERT, "insertNote", "new  Id = " + id)
 
@@ -89,7 +87,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, this.DATABASE
         val oldNoteCount = this.noteCount
 
         val db = writableDatabase
-        db.delete(TABLE, KEY_ID + " = ?", arrayOf(idStr))
+        db.delete(EXERCISE_TABLE, KEY_ID + " = ?", arrayOf(idStr))
         db.close()
 
         val newNoteCount = this.noteCount
@@ -102,11 +100,11 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, this.DATABASE
         val values = ContentValues()
 
         val dateStr = trainDay.date.time.toString()
-        values.put(KEY_ARR, trainDay.sets)
-        values.put(KEY_DATE, dateStr)
+        values.put(KEY_ARR, trainDay.trainingSets)
+        values.put(KEY_DESC, dateStr)
 
         val idStr = trainDay.id.toString()
-        val res = db.update(TABLE, values, KEY_ID + "= ?", arrayOf(idStr))
+        val res = db.update(EXERCISE_TABLE, values, KEY_ID + "= ?", arrayOf(idStr))
 
         Log.println(Log.ASSERT, "setUpdatingId", "setUpdatingId affected Rows: " + res)
 
@@ -118,7 +116,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, this.DATABASE
     val allNotes: ArrayList<TrainDay>
         get() {
             val db = readableDatabase
-            val cursor = db.rawQuery("SELECT * FROM " + TABLE, null)
+            val cursor = db.rawQuery("SELECT * FROM " + EXERCISE_TABLE, null)
 
             val res = ArrayList<TrainDay>()
 
@@ -142,7 +140,7 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, this.DATABASE
     val noteCount: Int
         get() {
             val db = readableDatabase
-            val cursor = db.rawQuery("SELECT * FROM " + TABLE, null)
+            val cursor = db.rawQuery("SELECT * FROM " + EXERCISE_TABLE, null)
 
             val count = cursor.count
             db.close()

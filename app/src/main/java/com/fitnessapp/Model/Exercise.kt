@@ -1,3 +1,3 @@
 package com.fitnessapp.Model
 
-class Exercise(var name: String, var desc: String)
+class Exercise(var id: Int, var name: String, var desc: String)
