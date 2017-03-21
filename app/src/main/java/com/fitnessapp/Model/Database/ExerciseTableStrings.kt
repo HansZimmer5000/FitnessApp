@@ -6,7 +6,7 @@ val EXERCISE_KEY_ID = "id"
 val EXERCISE_KEY_NAME = "name"
 val EXERCISE_KEY_DESC = "desc"
 
-fun getCREATEExerciseTable(): String {
+fun getCREATEExerciseTableString(): String {
     // 1. Array<TrainingSet> trainingSets | 2. java.util date
     return ("CREATE EXERCISE_TABLE " + EXERCISE_TABLE + "(" +
             EXERCISE_KEY_ID + " INTEGER PRIMARY KEY, " +
@@ -15,6 +15,6 @@ fun getCREATEExerciseTable(): String {
             ")")
 }
 
-fun getDROPExerciseTable(): String {
+fun getDROPExerciseTableString(): String {
     return ("DROP EXERCISE_TABLE IF EXISTS " + EXERCISE_TABLE)
 }

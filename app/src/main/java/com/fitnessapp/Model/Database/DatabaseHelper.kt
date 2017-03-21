@@ -2,30 +2,33 @@ package com.fitnessapp.Model.Database
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import com.fitnessapp.Model.*
 import java.util.*
+import kotlin.collections.ArrayList
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, this.DATABASE_NAME, null, this.DATABASE_VERSION) {
 
+
+    // Variables and methods mainly used by "super" class or the system.
     companion object {
 
-        // Allgemein gueltige private Konstanten
         private val DATABASE_VERSION = 1
-        private val DATABASE_NAME = "MyNoteDb"
+        private val DATABASE_NAME = "TrainingDatabase"
 
         private fun createAllTables(db: SQLiteDatabase) {
-            db.execSQL(getCREATEExerciseTable())
-            db.execSQL(getCREATETrainingSetTable())
-            db.execSQL(getCREATETrainingTable())
+            db.execSQL(getCREATEExerciseTableString())
+            db.execSQL(getCREATETrainingSetTableString())
+            db.execSQL(getCREATETrainingTableString())
         }
 
         private fun dropAllTables(db: SQLiteDatabase) {
-            db.execSQL(getDROPExerciseTable())
-            db.execSQL(getDROPTrainingSetTable())
-            db.execSQL(getDROPTrainingTable())
+            db.execSQL(getDROPExerciseTableString())
+            db.execSQL(getDROPTrainingSetTableString())
+            db.execSQL(getDROPTrainingTableString())
         }
     }
 
@@ -38,115 +41,315 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, this.DATABASE
         onCreate(db)
     }
 
-    /*/////////////////
-    CRUD Methods = Create, Read, Update, Delete
-    Schreiben, Lesen, Updaten und Loeschen von Eintraegen
-    *//////////////////
-
-    fun insertExercise(exe: Exercise): Long? {}
-    fun getExercise(id: Int): Exercise {}
-    fun deleteExercise(id: Int): Boolean {}
-    fun updateExercise(id: Int): Boolean {}
-    fun getAllExercises(): ArrayList<Exercise> {}
-
-    fun insertSet(set: TrainingSet): Long? {}
-    fun getSet(id: Int): TrainingSet {}
-    fun deleteSet(id: Int): Boolean {}
-    fun updateSet(id: Int): Boolean {}
-    fun getAllSets(): ArrayList<TrainingSet> {}
-
-    fun insertTraining(train: Training): Long? {}
-    fun getTraining(id: Int): Training {}
-    fun deleteTraining(id: Int): Boolean {}
-    fun updateTraining(id: Int): Boolean {}
-    fun getAllTrainings(): ArrayList<Training> {}
-
-
-
-
-
-    /*fun insertNote(trainDay: TrainDay): Long? {
+    /*//////////////////////////////////////////////////////////
+                    GENERAL CRUD
+    */////////////////////////////////////////////////////////
+    fun insert(table: String, values: ContentValues): Long {
         val db = writableDatabase
-        val values = ContentValues()
+        val res = db.insertOrThrow(table, null, values)
+        db.close()
 
-        val dateStr = trainDay.date.time.toString()
-        values.put(KEY_ARR, trainDay.trainingSets)
-        values.put(KEY_DESC, dateStr)
+        Log.println(Log.ASSERT, "insert", "Table: " + table + " new id: " + res)
 
-        val id = db.insertOrThrow(EXERCISE_TABLE, null, values)
+        return res
+    }
 
-        Log.println(Log.ASSERT, "insertNote", "new  Id = " + id)
+    fun get(table: String, key_id: String, id: Int): Cursor? {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM " + table + " WHERE " + key_id + " = " + id.toString(), null)
+        db.close()
 
-        trainDay.id = id.toInt()
+        Log.println(Log.ASSERT, "get", "Table: " + table + " cursor.count: " + cursor.count)
+
+        return cursor
+    }
+
+    fun getAll(table: String, first_id: Int?, last_id: Int?, key_id: String?): Cursor? {
+        val db = readableDatabase
+        val cursor: Cursor
+        if (first_id == null || last_id == null || key_id == null) {
+            cursor = db.rawQuery("SELECT * FROM " + table, null)
+            Log.println(Log.ASSERT, "getAll", "Table: " + table + " cursor.count: " + cursor.count + " cursor.columnCount " + cursor.columnCount)
+        } else {
+            cursor = db.rawQuery("SELECT * FROM " + table + " WHERE " + key_id + " >= " + first_id + " AND " + key_id + " <= " + last_id, null)
+            Log.println(Log.ASSERT, "getAll With Range", "Table: " + table + "first/last id: " + first_id + "/" + last_id + " cursor.count: " + cursor.count + " cursor.columnCount " + cursor.columnCount)
+        }
 
         db.close()
+
+        return cursor
+    }
+
+    fun update(table: String, values: ContentValues, id: Int): Boolean {
+        val db = writableDatabase
+        val res = db.update(EXERCISE_TABLE, values, EXERCISE_KEY_ID + "= ?", arrayOf(id.toString()))
+        db.close()
+
+        Log.println(Log.ASSERT, "update", "Table: " + table + " affected Rows: " + res)
+
+        return (res == 1)
+    }
+
+    fun delete(table: String, key_id: String, id: Int): Boolean {
+        val oldCount = getEntryCount(table)
+
+        val db = writableDatabase
+        db.delete(table, key_id + " = ?", arrayOf(id.toString()))
+        db.close()
+
+        val newCount = getEntryCount(table)
+
+        Log.println(Log.ASSERT, "delete", "Table: " + table + " entry differenc (before-after): " + (oldCount - newCount))
+
+        return newCount + 1 == oldCount
+    }
+
+    /*//////////////////////////////////////////////////////////
+                    EXERCISE CRUD
+    */////////////////////////////////////////////////////////
+    fun insertExercise(exe: Exercise): Long? {
+        val values = ContentValues()
+
+        values.put(EXERCISE_KEY_NAME, exe.name)
+        values.put(EXERCISE_KEY_DESC, exe.desc)
+
+        val id = insert(EXERCISE_TABLE, values)
+
+        exe.id = id.toInt()
+
         return id
     }
 
-    fun deleteNote(idStr: String): Boolean {
-        val oldNoteCount = this.noteCount
+    fun getExercise(id: Int): Exercise? {
+        val cursor = get(EXERCISE_TABLE, EXERCISE_KEY_ID, id)
+        var res: Exercise? = null
 
-        val db = writableDatabase
-        db.delete(EXERCISE_TABLE, KEY_ID + " = ?", arrayOf(idStr))
-        db.close()
+        if (cursor != null && cursor.moveToFirst()) {
+            val id = cursor.getInt(0)
+            val name = cursor.getString(1)
+            val desc = cursor.getString(2)
 
-        val newNoteCount = this.noteCount
+            res = Exercise(id, name, desc)
 
-        return newNoteCount + 1 == oldNoteCount
+            cursor.close()
+        }
+
+        return res
     }
 
-    fun updateNote(trainDay: TrainDay): Long? {
-        val db = writableDatabase
+    fun deleteExercise(id: Int): Boolean {
+        return delete(EXERCISE_TABLE, EXERCISE_KEY_ID, id)
+    }
+
+    fun updateExercise(exe: Exercise): Boolean {
         val values = ContentValues()
 
-        val dateStr = trainDay.date.time.toString()
-        values.put(KEY_ARR, trainDay.trainingSets)
-        values.put(KEY_DESC, dateStr)
+        values.put(EXERCISE_KEY_NAME, exe.name)
+        values.put(EXERCISE_KEY_DESC, exe.desc)
 
-        val idStr = trainDay.id.toString()
-        val res = db.update(EXERCISE_TABLE, values, KEY_ID + "= ?", arrayOf(idStr))
-
-        Log.println(Log.ASSERT, "setUpdatingId", "setUpdatingId affected Rows: " + res)
-
-        db.close()
-
-        return res.toLong()
+        return update(EXERCISE_TABLE, values, exe.id)
     }
 
-    val allNotes: ArrayList<TrainDay>
-        get() {
-            val db = readableDatabase
-            val cursor = db.rawQuery("SELECT * FROM " + EXERCISE_TABLE, null)
+    fun getAllExercises(): ArrayList<Exercise> {
+        var cursor = getAll(EXERCISE_TABLE, null, null, null)
+        var res = ArrayList<Exercise>()
 
-            val res = ArrayList<TrainDay>()
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                val id = cursor.getInt(0)
+                val name = cursor.getString(1)
+                val desc = cursor.getString(2)
 
-            if (cursor != null && cursor.moveToFirst()) {
-                do {
-                    val id = cursor.getInt(0)
-                    val arrStr = cursor.getString(1)
-                    val noteDate = Date(java.lang.Long.valueOf(cursor.getString(2))!!)
+                res.add(Exercise(id, name, desc))
 
-                    res.add(TrainDay(id, arr, noteDate))
-
-                } while (cursor.moveToNext())
-                cursor.close()
-            }
-            db.close()
-
-            return res
-        }
-
-    private
-    val noteCount: Int
-        get() {
-            val db = readableDatabase
-            val cursor = db.rawQuery("SELECT * FROM " + EXERCISE_TABLE, null)
-
-            val count = cursor.count
-            db.close()
+            } while (cursor.moveToNext())
             cursor.close()
-
-            return count
         }
-        */
+        return res
+    }
+
+    /*//////////////////////////////////////////////////////////
+                    TRAININGSET CRUD
+    */////////////////////////////////////////////////////////
+    fun insertTrainingSet(set: TrainingSet): Long? {
+        val values = ContentValues()
+
+        values.put(TRAININGSET_KEY_FOREIGN_EXERCISE, set.exercise.id)
+        values.put(TRAININGSET_KEY_COUNT, set.reps)
+
+        val id = insert(TRAININGSET_TABLE, values)
+
+        set.id = id.toInt()
+
+        return id
+    }
+
+    fun getTrainingSet(id: Int): TrainingSet? {
+        val cursor = get(TRAININGSET_TABLE, TRAININGSET_KEY_ID, id)
+        var res: TrainingSet? = null
+
+        if (cursor != null && cursor.moveToFirst()) {
+            val id = cursor.getInt(0)
+            val exercise_id = cursor.getInt(1)
+            val reps = cursor.getInt(2)
+
+            val exercise = getExercise(exercise_id)
+
+            if (exercise != null) {
+                res = TrainingSet(id, exercise, reps)
+            }
+
+            cursor.close()
+        }
+
+        return res
+    }
+
+    fun deleteTrainingSet(id: Int): Boolean {
+        return delete(TRAININGSET_TABLE, TRAININGSET_KEY_ID, id)
+    }
+
+    fun updateTrainingSet(set: TrainingSet): Boolean {
+        val values = ContentValues()
+
+        values.put(TRAININGSET_KEY_FOREIGN_EXERCISE, set.exercise.id)
+        values.put(TRAININGSET_KEY_COUNT, set.reps)
+
+        return update(TRAININGSET_TABLE, values, set.id)
+    }
+
+    fun getAllTrainingSets(): ArrayList<TrainingSet> {
+        var cursor = getAll(TRAININGSET_TABLE, null, null, null)
+        var res = ArrayList<TrainingSet>()
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                val id = cursor.getInt(0)
+                val exercise_id = cursor.getInt(1)
+                val reps = cursor.getInt(2)
+
+                val exercise = getExercise(exercise_id)
+
+                if (exercise != null) {
+                    res.add(TrainingSet(id, exercise, reps))
+                }
+
+            } while (cursor.moveToNext())
+            cursor.close()
+        }
+        return res
+    }
+
+    fun getAllTrainingSets(first_id: Int, last_id: Int): ArrayList<TrainingSet> {
+        var cursor = getAll(TRAININGSET_TABLE, first_id, last_id, TRAININGSET_KEY_ID)
+        var res = ArrayList<TrainingSet>()
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                val id = cursor.getInt(0)
+                val exercise_id = cursor.getInt(1)
+                val reps = cursor.getInt(2)
+
+                val exercise = getExercise(exercise_id)
+
+                if (exercise != null) {
+                    res.add(TrainingSet(id, exercise, reps))
+                }
+
+            } while (cursor.moveToNext())
+            cursor.close()
+        }
+        return res
+    }
+
+    /*//////////////////////////////////////////////////////////
+                    TRAINING CRUD
+    */////////////////////////////////////////////////////////
+    fun insertTraining(training: Training): Long? {
+        val values = ContentValues()
+
+        values.put(TRAINING_KEY_FOREIGN_SET_FIRST, training.trainingSets.get(0).id)
+        values.put(TRAINING_KEY_FOREIGN_SET_LAST, training.trainingSets.get(training.trainingSets.lastIndex).id)
+        values.put(TRAINING_KEY_DATE, training.date.toString())
+
+        val id = insert(TRAININGSET_TABLE, values)
+
+        training.id = id.toInt()
+
+        return id
+    }
+
+    fun getTraining(id: Int): Training? {
+        val cursor = get(TRAINING_TABLE, TRAINING_KEY_ID, id)
+        var res: Training? = null
+
+        if (cursor != null && cursor.moveToFirst()) {
+            val id = cursor.getInt(0)
+            val first_set_id = cursor.getInt(1)
+            val last_set_id = cursor.getInt(2)
+            val date = Date(java.lang.Long.valueOf(cursor.getString(3))!!)
+
+            var trainingSets = getAllTrainingSets(first_set_id, last_set_id)
+
+            if (!trainingSets.isEmpty()) {
+                res = Training(id, trainingSets, date)
+            }
+
+            cursor.close()
+        }
+
+        return res
+    }
+
+    fun deleteTraining(id: Int): Boolean {
+        return delete(TRAINING_TABLE, TRAINING_KEY_ID, id)
+    }
+
+    fun updateTraining(training: Training): Boolean {
+        val values = ContentValues()
+
+        values.put(TRAINING_KEY_FOREIGN_SET_FIRST, training.trainingSets.get(0).id)
+        values.put(TRAINING_KEY_FOREIGN_SET_LAST, training.trainingSets.get(training.trainingSets.lastIndex).id)
+        values.put(TRAINING_KEY_DATE, training.date.toString())
+
+        return update(TRAININGSET_TABLE, values, training.id)
+    }
+
+    fun getAllTrainings(): ArrayList<Training> {
+        var cursor = getAll(TRAINING_TABLE, null, null, null)
+        var res = ArrayList<Training>()
+
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                val id = cursor.getInt(0)
+                val first_set_id = cursor.getInt(1)
+                val last_set_id = cursor.getInt(2)
+                val date = Date(java.lang.Long.valueOf(cursor.getString(3))!!)
+
+                var trainingSets = getAllTrainingSets(first_set_id, last_set_id)
+
+                if (!trainingSets.isEmpty()) {
+                    res.add(Training(id, trainingSets, date))
+                }
+
+            } while (cursor.moveToNext())
+            cursor.close()
+        }
+        return res
+    }
+
+    /*//////////////////////////////////////////////////////////
+                    NOT CRUD METHODS
+    */////////////////////////////////////////////////////////
+    private fun getEntryCount(table: String): Int {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM " + table, null)
+        val count = cursor.count
+
+        db.close()
+        cursor.close()
+
+        return count
+    }
+
 }

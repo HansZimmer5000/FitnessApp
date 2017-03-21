@@ -4,9 +4,9 @@ package com.fitnessapp.Model.Database
 val TRAININGSET_TABLE = "exercises"
 val TRAININGSET_KEY_ID = "id"
 val TRAININGSET_KEY_FOREIGN_EXERCISE = "exercise_id"
-val TRAININGSET_KEY_COUNT = "count"
+val TRAININGSET_KEY_COUNT = "repetition"
 
-fun getCREATETrainingSetTable(): String {
+fun getCREATETrainingSetTableString(): String {
     // 1. Array<TrainingSet> trainingSets | 2. java.util date
     return ("CREATE EXERCISE_TABLE " + TRAININGSET_TABLE + "(" +
             TRAININGSET_KEY_ID + " INTEGER PRIMARY KEY, " +
@@ -16,6 +16,6 @@ fun getCREATETrainingSetTable(): String {
             ")")
 }
 
-fun getDROPTrainingSetTable(): String {
+fun getDROPTrainingSetTableString(): String {
     return ("DROP EXERCISE_TABLE IF EXISTS " + TRAININGSET_TABLE)
 }
