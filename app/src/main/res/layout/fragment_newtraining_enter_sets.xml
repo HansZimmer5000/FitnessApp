@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:id="@+id/rlEnterSets"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- TODO: try to fill with java Code only!-->
 
     <!--TODO: Make Layout to show as many Exercises below each other as the user choosed in "fragment_newtraining_select_exercises". Show exercise titles only.
         TODO: Also let the user set as many Sets per Exercises as he would like to do. The sets are left and right of each other.-->

@@ -27,7 +27,7 @@ class SectionsPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     }
 
     override fun getItem(pos: Int): Fragment? {
-        //TODO: Only show trainDayEnterSets if SelectExercises-Btn was pressed and Exercises have been selected!
+        //TODO: Only show trainDayEnterSets if SelectExercises-Btn was pressed and Exercises have been selected! Or just load selected Exercise in otherwise empty fragment?
 
         when (pos) {
             overviewPos -> return this.overviewFragment

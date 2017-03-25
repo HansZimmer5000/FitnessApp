@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 
 import com.fitnessapp.Controll.MainController
-import com.fitnessapp.View.MainActivity
 
 import ownuse.fitnessapp.R
 
