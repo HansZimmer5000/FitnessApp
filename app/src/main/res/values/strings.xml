@@ -1,9 +1,17 @@
 <resources>
+    <!-- General -->
     <string name="app_name">FitnessApp</string>
     <string name="action_settings">Settings</string>
-    <string name="section_format">Hello World from section: %1$d</string>
-    <string name="add">Hinzufügen</string>
-    <string name="enter_new_exercise_name">Übungsname</string>
-    <string name="enter_new_exercise_desc">Übungsbeschreibung</string>
-    <string name="click_to_send">Klicken um in Dropbox zu shren.</string>
+
+    <!-- New Exercise Tab -->
+    <string name="newExAddText">Hinzufügen</string>
+    <string name="newExNameText">Übungsname</string>
+    <string name="newExDescText">Übungsbeschreibung</string>
+
+    <!-- New Training Tab -->
+    <string name="btnStartTrain">Start Training</string>
+
+    <!-- Overview Tab -->
+    <string name="overviewClickToSendText">Klicken um in Dropbox zu sharen.</string>
+
 </resources>

@@ -4,7 +4,12 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/tvExItemExName"
+        android:id="@+id/tvExDialogTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/tvExDialogDesc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

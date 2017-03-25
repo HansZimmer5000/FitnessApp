@@ -12,8 +12,9 @@ import kotlin.collections.ArrayList
 
 class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, this.DATABASE_NAME, null, this.DATABASE_VERSION) {
 
-
-    // Variables and methods mainly used by "super" class or the system.
+    /*//////////////////////////////////////////////////////////
+                Variables and methods mainly used by "super" class or the system.
+    */////////////////////////////////////////////////////////
     companion object {
 
         private val DATABASE_VERSION = 1
