@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/item_training_exercise_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sets von Exercise N" />
+
+    <EditText
+        android:id="@+id/item_training_firstet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/item_training_exercise_tv"
+        android:width="@dimen/item_trianing_input_size"
+        android:digits="2" />
+
+    <TextView
+        android:id="@+id/item_training_slashTV1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/item_training_exercise_tv"
+        android:layout_toEndOf="@id/item_training_firstet"
+        android:text="@string/item_training_slash"
+        android:textSize="@dimen/item_training_slash_size" />
+
+    <!-- TODO: Not so nice to just copy and paste this stuff. Find better way in next Version-->
+
+    <EditText
+        android:id="@+id/item_training_midet1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/item_training_exercise_tv"
+        android:layout_toEndOf="@id/item_training_slashTV1"
+        android:width="@dimen/item_trianing_input_size"
+        android:digits="2" />
+
+    <TextView
+        android:id="@+id/item_training_slashTV2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/item_training_exercise_tv"
+        android:layout_toEndOf="@id/item_training_midet1"
+        android:text="@string/item_training_slash"
+        android:textSize="@dimen/item_training_slash_size" />
+
+    <EditText
+        android:id="@+id/item_training_midet2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/item_training_exercise_tv"
+        android:layout_toEndOf="@id/item_training_slashTV2"
+        android:width="@dimen/item_trianing_input_size"
+        android:digits="2" />
+
+    <TextView
+        android:id="@+id/item_training_slashTV3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/item_training_exercise_tv"
+        android:layout_toEndOf="@id/item_training_midet2"
+        android:text="@string/item_training_slash"
+        android:textSize="@dimen/item_training_slash_size" />
+
+    <EditText
+        android:id="@+id/item_training_midet3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/item_training_exercise_tv"
+        android:layout_toEndOf="@id/item_training_slashTV3"
+        android:width="@dimen/item_trianing_input_size"
+        android:digits="2" />
+
+    <TextView
+        android:id="@+id/item_training_slashTV4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/item_training_exercise_tv"
+        android:layout_toEndOf="@id/item_training_midet3"
+        android:text="@string/item_training_slash"
+        android:textSize="@dimen/item_training_slash_size" />
+
+    <EditText
+        android:id="@+id/item_training_midet4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/item_training_exercise_tv"
+        android:layout_toEndOf="@id/item_training_slashTV4"
+        android:width="@dimen/item_trianing_input_size"
+        android:digits="2" />
+
+
+</RelativeLayout>

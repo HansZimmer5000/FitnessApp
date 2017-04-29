@@ -13,5 +13,6 @@
 
     <!-- Overview Tab -->
     <string name="overviewClickToSendText">Klicken um in Dropbox zu sharen.</string>
+    <string name="item_training_slash">/</string>
 
 </resources>
